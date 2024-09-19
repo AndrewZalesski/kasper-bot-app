@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
@@ -83,3 +84,65 @@ client.once('ready', () => {
 client.login(token)
     .then(() => console.log('Bot logged in successfully.'))
     .catch(error => console.error('Failed to log in:', error.message)); // Log any login errors
+
+
+// Function to fetch market cap from the /prices API
+async function getMarketCap() {
+    const apiUrl = 'https://kasper-charts-ae1d58154e70.herokuapp.com/prices?range=1h';  // Fetch from the /prices endpoint
+    try {
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+        
+        // Assuming the last data point in the response contains the latest market cap
+        if (data && data.length > 0) {
+            const latestData = data[data.length - 1];
+            const marketCap = latestData.marketCap;
+            console.log('Fetched Market Cap:', marketCap);
+            return marketCap;
+        } else {
+            console.error('No data found in the /prices response');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching market cap from /prices API:', error);
+        return null;
+    }
+}
+
+// Function to update the original channel name with the floor price (already in the code)
+async function updateChannelNameWithFloorPrice() {
+    const floorPrice = await getFloorPrice();
+    const floorPriceChannel = await client.channels.fetch(channelId);  // Channel ID for the floor price
+
+    if (floorPrice) {
+        const newChannelName = `KASPER Floor: ${floorPrice} KAS`;  // Update the channel name
+        try {
+            await floorPriceChannel.setName(newChannelName);
+            console.log(`Channel name updated to: ${newChannelName}`);
+        } catch (error) {
+            console.error('Error updating channel name:', error);
+        }
+    } else {
+        console.error('Floor price not available to update channel name.');
+    }
+}
+
+// Function to post the market cap to a different channel
+async function postMarketCap() {
+    const marketCap = await getMarketCap();
+    const marketCapChannelId = '1286442064669708400';  // New Channel ID for market cap updates
+    const marketCapChannel = await client.channels.fetch(marketCapChannelId);
+
+    if (marketCap) {
+        marketCapChannel.send(`The current Kasper Market Cap is: ${marketCap}`);
+    } else {
+        console.error('Market cap not available to post.');
+    }
+}
+
+// Append this to the existing bot's ready event to update the original channel name and post market cap in another channel
+client.once('ready', () => {
+    console.log('Bot is online and ready');
+    updateChannelNameWithFloorPrice();  // Update the original channel name with floor price
+    postMarketCap();   // Post market cap to the new channel
+});
