@@ -126,9 +126,9 @@ client.once('ready', () => {
     updateFloorPriceChannelName();
     setInterval(updateFloorPriceChannelName, 900000); // 15 minutes
 
-    // Update the market cap channel name every 15 seconds
+    // Update the market cap channel name every 60 seconds
     updateMarketCapChannelName();
-    setInterval(updateMarketCapChannelName, 15000); // 15 seconds
+    setInterval(updateMarketCapChannelName, 60000); // 60 seconds
 });
 
 // Log in to Discord with the bot's token
