@@ -103,7 +103,7 @@ async function updateMarketCapChannelName() {
 
     if (marketCap !== null) {
         const channel = await client.channels.fetch(marketCapChannelId);
-        const newChannelName = `KASPER Market Cap: ${marketCap}`;
+        const newChannelName = `MC: ${marketCap}`;  // Update the channel name with the new shorter format
 
         console.log(`New market cap channel name will be: ${newChannelName}`); // Log the new channel name
 
